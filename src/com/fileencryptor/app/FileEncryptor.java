@@ -8,7 +8,15 @@ import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
+import java.io.IOException;
+import java.security.InvalidAlgorithmParameterException;
+import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
+import java.security.spec.InvalidKeySpecException;
 
+import javax.crypto.BadPaddingException;
+import javax.crypto.IllegalBlockSizeException;
+import javax.crypto.NoSuchPaddingException;
 import javax.swing.ButtonGroup;
 import javax.swing.JButton;
 import javax.swing.JFileChooser;
@@ -195,8 +203,76 @@ public class FileEncryptor implements Runnable {
 							.showMessageDialog(container,
 									"Incorrect input \n1. Check for empty fields \n2. Check for invalid data");
 
-				}
+				} else if (mCurrentCryptoMode.equals(CryptoMode.ENCRYPT)) {
 
+					try {
+						String dataToEncrypt = FileHandler.ReadFile(inputFile);
+
+						String encryptedData = AESHandler.encryptData(
+								dataToEncrypt, mJTextFieldKeyField.getText());
+
+						if (FileHandler.WriteFile(outputFile, encryptedData)) {
+							JOptionPane.showMessageDialog(container,
+									"Encryption done");
+							mJButtonReset.doClick();
+						} else {
+							JOptionPane.showMessageDialog(container,
+									"Error in file writing (Output file)");
+						}
+
+					} catch (IOException e1) {
+
+						JOptionPane.showMessageDialog(container,
+								"Error in file reading (Input file)");
+						e1.printStackTrace();
+
+					} catch (InvalidKeyException | NoSuchAlgorithmException
+							| NoSuchPaddingException
+							| IllegalBlockSizeException | BadPaddingException
+							| InvalidKeySpecException e2) {
+
+						JOptionPane.showMessageDialog(container,
+								"Error in encryption");
+
+						e2.printStackTrace();
+					}
+				} else if (mCurrentCryptoMode.equals(CryptoMode.DECRYPT)) {
+
+					try {
+						String dataToDecrypt = FileHandler.ReadFile(inputFile);
+
+						String decryptedData = AESHandler.decryptData(
+								dataToDecrypt, mJTextFieldKeyField.getText());
+						
+						if (FileHandler.WriteFile(outputFile, decryptedData)) {
+							JOptionPane.showMessageDialog(container,
+									"Decryption done");
+							mJButtonReset.doClick();
+						} else {
+							JOptionPane.showMessageDialog(container,
+									"Error in file writing (Output file)");
+						}
+								
+
+					} catch (IOException e1) {
+						
+						JOptionPane.showMessageDialog(container,
+								"Error in file reading (Input file)");
+						e1.printStackTrace();
+
+					} catch (InvalidKeyException | NoSuchAlgorithmException
+							| InvalidKeySpecException
+							| InvalidAlgorithmParameterException
+							| NoSuchPaddingException
+							| IllegalBlockSizeException | BadPaddingException e2) {
+						
+						JOptionPane.showMessageDialog(container,
+								"Error in encryption");
+
+						e2.printStackTrace();
+					}
+
+				}
 			}
 		});
 
